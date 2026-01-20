@@ -14,12 +14,13 @@ const languages: Language[] = ['English', 'Hindi', 'Bengali', 'Marathi', 'Gujara
 interface ExplanationViewProps {
   explanation: string;
   fileName: string;
+  language: Language;
   onNewUpload: () => void;
   onTranslate: (language: Language) => void;
   isTranslating: boolean;
 }
 
-export function ExplanationView({ explanation, fileName, onNewUpload, onTranslate, isTranslating }: ExplanationViewProps) {
+export function ExplanationView({ explanation, fileName, language, onNewUpload, onTranslate, isTranslating }: ExplanationViewProps) {
   const [targetLanguage, setTargetLanguage] = useState<Language>('English');
 
   return (
@@ -42,7 +43,7 @@ export function ExplanationView({ explanation, fileName, onNewUpload, onTranslat
           </p>
         </CardContent>
         <CardFooter className="flex-col sm:flex-row gap-4 justify-between items-center print:hidden">
-            <VoiceNarrator textToSpeak={explanation} />
+            <VoiceNarrator textToSpeak={explanation} language={language} />
             <div className="flex gap-2 w-full sm:w-auto">
                 <Select value={targetLanguage} onValueChange={(v) => setTargetLanguage(v as Language)} disabled={isTranslating}>
                     <SelectTrigger className="w-full sm:w-[180px]">

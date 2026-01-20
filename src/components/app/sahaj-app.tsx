@@ -14,6 +14,7 @@ type Language = 'English' | 'Hindi' | 'Bengali' | 'Marathi' | 'Gujarati' | 'Tami
 
 export function SahajApp() {
   const [explanationResult, setExplanationResult] = useState<ExplainGovernmentFormOutput | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('English');
   const [isLoading, setIsLoading] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +26,7 @@ export function SahajApp() {
     setError(null);
     setExplanationResult(null);
     setFileName(file.name);
+    setCurrentLanguage(language);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -73,6 +75,7 @@ export function SahajApp() {
       const result: TranslateFormExplanationOutput = await translateExplanationAction(input);
       if (result.translatedExplanation) {
         setExplanationResult({ explanation: result.translatedExplanation });
+        setCurrentLanguage(language);
         toast({
           title: "Success",
           description: `Explanation translated to ${language}.`,
@@ -102,6 +105,7 @@ export function SahajApp() {
         <ExplanationView
           explanation={explanationResult.explanation}
           fileName={fileName}
+          language={currentLanguage}
           onNewUpload={() => {
             setExplanationResult(null);
             setFileName('');

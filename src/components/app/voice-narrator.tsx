@@ -1,87 +1,102 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, StopCircle } from 'lucide-react';
+import { Play, Pause, StopCircle, Loader2 } from 'lucide-react';
+import { textToSpeechAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+
+type Language = 'English' | 'Hindi' | 'Bengali' | 'Marathi' | 'Gujarati' | 'Tamil';
 
 interface VoiceNarratorProps {
   textToSpeak: string;
+  language: Language;
 }
 
-export function VoiceNarrator({ textToSpeak }: VoiceNarratorProps) {
-  const [isSupported, setIsSupported] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+export function VoiceNarrator({ textToSpeak, language }: VoiceNarratorProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
+  // Reset audio when text or language changes
   useEffect(() => {
-    const checkSupport = 'speechSynthesis' in window;
-    setIsSupported(checkSupport);
-
-    // Cleanup: cancel speech synthesis on component unmount or when text changes
-    return () => {
-      if (checkSupport) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, [textToSpeak]);
-
-  const handlePlay = () => {
-    if (!isSupported) return;
-
-    if (isPaused) {
-      window.speechSynthesis.resume();
-    } else {
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.onend = () => {
-        setIsActive(false);
-        setIsPaused(false);
-      };
-      utterance.onerror = () => {
-        // Handle potential errors
-        setIsActive(false);
-        setIsPaused(false);
-      };
-      window.speechSynthesis.cancel(); // ensure nothing else is speaking
-      window.speechSynthesis.speak(utterance);
+    setAudioDataUri(null);
+    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
     }
-    setIsActive(true);
-    setIsPaused(false);
-  };
+  }, [textToSpeak, language]);
 
-  const handlePause = () => {
-    if (!isSupported) return;
-    window.speechSynthesis.pause();
-    setIsPaused(true);
-  };
+  const handlePlayPause = async () => {
+    if (isPlaying) {
+      audioRef.current?.pause();
+      return;
+    }
 
-  const handleStop = () => {
-    if (!isSupported) return;
-    window.speechSynthesis.cancel();
-    setIsActive(false);
-    setIsPaused(false);
+    if (audioDataUri && audioRef.current) {
+      audioRef.current.play();
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await textToSpeechAction({ text: textToSpeak, language });
+      if (result.audioDataUri) {
+        setAudioDataUri(result.audioDataUri);
+      } else {
+        throw new Error('Could not generate audio.');
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Audio Generation Error',
+        description: error.message || 'Failed to generate audio.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  if (!isSupported) {
-    return <p className="text-sm text-muted-foreground">Voice narration not supported.</p>;
-  }
+  // Effect to play audio when data URI is set
+  useEffect(() => {
+    if (audioDataUri && audioRef.current) {
+      audioRef.current.src = audioDataUri;
+      audioRef.current.play();
+    }
+  }, [audioDataUri]);
 
+
+  const handleStop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+  
   return (
     <div className="flex items-center gap-2">
-      {!isActive ? (
-        <Button onClick={handlePlay} variant="outline">
-          <Play className="mr-2 h-4 w-4" />
-          Listen
-        </Button>
-      ) : (
-        <Button onClick={isPaused ? handlePlay : handlePause} variant="outline">
-          {isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
-          {isPaused ? 'Resume' : 'Pause'}
-        </Button>
-      )}
-      <Button onClick={handleStop} variant="ghost" size="icon" disabled={!isActive && !isPaused}>
+      <Button onClick={handlePlayPause} variant="outline" disabled={isLoading}>
+        {isLoading ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Generating...</>
+        ) : isPlaying ? (
+            <><Pause className="mr-2 h-4 w-4" /> Pause</>
+        ) : (
+            <><Play className="mr-2 h-4 w-4" /> {audioDataUri && !isPlaying ? 'Play' : 'Listen'}</>
+        )}
+      </Button>
+      <Button onClick={handleStop} variant="ghost" size="icon" disabled={!audioDataUri}>
         <StopCircle className='h-5 w-5'/>
         <span className="sr-only">Stop</span>
       </Button>
+      <audio 
+        ref={audioRef}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+      />
     </div>
   );
 }
