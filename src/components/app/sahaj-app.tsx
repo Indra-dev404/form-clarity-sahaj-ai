@@ -6,6 +6,7 @@ import { ExplanationView } from './explanation-view';
 import { getExplanationAction, translateExplanationAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { ExplainGovernmentFormOutput } from '@/ai/flows/explain-government-form';
 import type { TranslateFormExplanationInput, TranslateFormExplanationOutput } from '@/ai/flows/translate-form-explanation';
 
