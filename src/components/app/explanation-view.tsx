@@ -7,12 +7,14 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Languages, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
+import { Checkbox } from '../ui/checkbox';
 
 type Language = 'English' | 'Hindi' | 'Bengali' | 'Marathi' | 'Gujarati' | 'Tamil';
 const languages: Language[] = ['English', 'Hindi', 'Bengali', 'Marathi', 'Gujarati', 'Tamil'];
 
 interface ExplanationViewProps {
   explanation: string;
+  checklist: string[];
   fileName: string;
   language: Language;
   onNewUpload: () => void;
@@ -20,7 +22,7 @@ interface ExplanationViewProps {
   isTranslating: boolean;
 }
 
-export function ExplanationView({ explanation, fileName, language, onNewUpload, onTranslate, isTranslating }: ExplanationViewProps) {
+export function ExplanationView({ explanation, checklist, fileName, language, onNewUpload, onTranslate, isTranslating }: ExplanationViewProps) {
   const [targetLanguage, setTargetLanguage] = useState<Language>('English');
 
   return (
@@ -36,11 +38,33 @@ export function ExplanationView({ explanation, fileName, language, onNewUpload, 
           <CardTitle className="font-headline text-3xl">Explanation for <span className="text-primary">{fileName}</span></CardTitle>
           <CardDescription>Here is a simplified explanation of your document.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Separator />
-          <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap">
-            {explanation}
-          </p>
+        <CardContent className="space-y-6">
+          <div>
+            <Separator />
+            <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap mt-4">
+              {explanation}
+            </p>
+          </div>
+          <div>
+            <Separator/>
+            <div className="mt-6">
+              <h3 className="font-headline text-2xl">Submission Checklist</h3>
+              <p className="text-muted-foreground mb-4">Follow these steps to ensure your form is submitted correctly.</p>
+              <div className="space-y-4">
+                  {checklist.map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <Checkbox id={`checklist-${index}`} className="mt-1" />
+                      <label
+                        htmlFor={`checklist-${index}`}
+                        className="text-sm font-normal text-foreground/90 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {item}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex-col sm:flex-row gap-4 justify-between items-center print:hidden">
             <VoiceNarrator textToSpeak={explanation} language={language} />

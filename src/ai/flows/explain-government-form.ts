@@ -24,6 +24,7 @@ export type ExplainGovernmentFormInput = z.infer<typeof ExplainGovernmentFormInp
 
 const ExplainGovernmentFormOutputSchema = z.object({
   explanation: z.string().describe('A simplified explanation of the government form.'),
+  checklist: z.array(z.string()).describe('A checklist of actionable steps to correctly fill and submit the form. Each item should be a short, clear instruction.'),
 });
 export type ExplainGovernmentFormOutput = z.infer<typeof ExplainGovernmentFormOutputSchema>;
 
@@ -35,7 +36,7 @@ const prompt = ai.definePrompt({
   name: 'explainGovernmentFormPrompt',
   input: {schema: ExplainGovernmentFormInputSchema},
   output: {schema: ExplainGovernmentFormOutputSchema},
-  prompt: `You are an expert in simplifying complex government forms into plain language. You will extract key information and provide clear explanations of the form's purpose and requirements in the specified language.
+  prompt: `You are an expert in simplifying complex government forms into plain language. You will extract key information and provide clear explanations of the form's purpose and requirements in the specified language. Additionally, you will generate a checklist of actionable steps required to fill out and submit the form correctly. Each checklist item should be a short, clear instruction.
 
 Language: {{{language}}}
 

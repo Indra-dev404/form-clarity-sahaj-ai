@@ -34,10 +34,10 @@ export function SahajApp() {
       const dataUri = reader.result as string;
       try {
         const result = await getExplanationAction({ documentDataUri: dataUri, language });
-        if (result.explanation) {
+        if (result.explanation && result.checklist) {
           setExplanationResult(result);
         } else {
-          throw new Error('Failed to get an explanation from the AI.');
+          throw new Error('Failed to get an explanation or checklist from the AI.');
         }
       } catch (e: any) {
         const errorMessage = e.message || 'An unexpected error occurred.';
@@ -64,17 +64,21 @@ export function SahajApp() {
   };
 
   const handleTranslate = async (language: Language) => {
-    if (!explanationResult?.explanation) return;
+    if (!explanationResult?.explanation || !explanationResult?.checklist) return;
 
     setIsTranslating(true);
     try {
       const input: TranslateFormExplanationInput = {
         explanation: explanationResult.explanation,
+        checklist: explanationResult.checklist,
         language: language,
       };
       const result: TranslateFormExplanationOutput = await translateExplanationAction(input);
-      if (result.translatedExplanation) {
-        setExplanationResult({ explanation: result.translatedExplanation });
+      if (result.translatedExplanation && result.translatedChecklist) {
+        setExplanationResult({
+          explanation: result.translatedExplanation,
+          checklist: result.translatedChecklist,
+        });
         setCurrentLanguage(language);
         toast({
           title: "Success",
@@ -104,6 +108,7 @@ export function SahajApp() {
       {explanationResult && !isLoading && (
         <ExplanationView
           explanation={explanationResult.explanation}
+          checklist={explanationResult.checklist}
           fileName={fileName}
           language={currentLanguage}
           onNewUpload={() => {
