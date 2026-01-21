@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FileUploader } from './file-uploader';
 import { ExplanationView } from './explanation-view';
-import { getExplanationAction, translateExplanationAction } from '@/app/actions';
+import { getExplanationAction, translateExplanationAction, getServiceCenterInfoAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -19,12 +19,14 @@ export function SahajApp() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
+  const [mapQuery, setMapQuery] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleFileProcess = async (file: File, language: Language) => {
     setIsLoading(true);
     setError(null);
     setExplanationResult(null);
+    setMapQuery(null);
     setFileName(file.name);
     setCurrentLanguage(language);
 
@@ -36,6 +38,17 @@ export function SahajApp() {
         const result = await getExplanationAction({ documentDataUri: dataUri, language });
         if (result.explanation && result.checklist) {
           setExplanationResult(result);
+
+          // Also fetch the map query
+          try {
+            const mapResult = await getServiceCenterInfoAction({ explanation: result.explanation });
+            setMapQuery(mapResult.searchQuery);
+          } catch (mapError) {
+            // We don't need to block the user if this fails, just log it
+            console.error("Could not get map query:", mapError);
+            setMapQuery(null);
+          }
+
         } else {
           throw new Error('Failed to get an explanation or checklist from the AI.');
         }
@@ -114,9 +127,11 @@ export function SahajApp() {
           onNewUpload={() => {
             setExplanationResult(null);
             setFileName('');
+            setMapQuery(null);
           }}
           onTranslate={handleTranslate}
           isTranslating={isTranslating}
+          mapQuery={mapQuery}
         />
       )}
     </div>

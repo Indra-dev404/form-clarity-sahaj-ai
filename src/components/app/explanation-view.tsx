@@ -8,6 +8,7 @@ import { ArrowLeft, Languages, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
+import { MapEmbed } from './map-embed';
 
 type Language = 'English' | 'Hindi' | 'Bengali' | 'Marathi' | 'Gujarati' | 'Tamil';
 const languages: Language[] = ['English', 'Hindi', 'Bengali', 'Marathi', 'Gujarati', 'Tamil'];
@@ -20,9 +21,10 @@ interface ExplanationViewProps {
   onNewUpload: () => void;
   onTranslate: (language: Language) => void;
   isTranslating: boolean;
+  mapQuery: string | null;
 }
 
-export function ExplanationView({ explanation, checklist, fileName, language, onNewUpload, onTranslate, isTranslating }: ExplanationViewProps) {
+export function ExplanationView({ explanation, checklist, fileName, language, onNewUpload, onTranslate, isTranslating, mapQuery }: ExplanationViewProps) {
   const [targetLanguage, setTargetLanguage] = useState<Language>('English');
 
   return (
@@ -84,6 +86,20 @@ export function ExplanationView({ explanation, checklist, fileName, language, on
             </div>
         </CardFooter>
       </Card>
+
+      {mapQuery && (
+        <Card className="print:hidden">
+          <CardHeader>
+            <CardTitle className="font-headline text-3xl">Find Nearby Centers</CardTitle>
+            <CardDescription>
+              Here are some locations for &quot;{mapQuery}&quot; near you.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MapEmbed searchQuery={mapQuery} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
