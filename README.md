@@ -21,7 +21,7 @@ Sahaj AI is an intelligent application designed to demystify complex government 
 *   **Framework**: [Next.js](https://nextjs.org/) (with App Router)
 *   **UI**: [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/)
 *   **Generative AI**: [Firebase Genkit](https://firebase.google.com/docs/genkit) with Google Gemini models.
-*   **Deployment**: [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
+*   **Deployment**: [Vercel](https://vercel.com/indrajit-biswas-projects)
 
 ## Getting Started
 
