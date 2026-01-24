@@ -8,7 +8,7 @@ export function AppHeader() {
         
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo1.png"
+            src="/logof.png"
             alt="Sahaj AI Logo"
             width={40}
             height={40}
