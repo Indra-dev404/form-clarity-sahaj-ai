@@ -4,6 +4,9 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/components/app/auth-context';
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.ico',
+  },
   title: 'Sahaj AI',
   description: 'Understand government forms with AI',
 };
