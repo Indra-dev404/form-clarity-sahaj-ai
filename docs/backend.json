@@ -1,0 +1,295 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user account in the Sahaj AI application. This entity manages user-specific data, excluding authentication credentials.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's unique email address, used for identification and communication.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserPreference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserPreference",
+      "type": "object",
+      "description": "Stores user-specific preferences and settings for the Sahaj AI application, such as default language and voice narration choices.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserPreference entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 UserPreference)"
+        },
+        "defaultExplanationLanguage": {
+          "type": "string",
+          "description": "The user's preferred default language for AI-generated explanations (e.g., 'en', 'hi', 'bn')."
+        },
+        "preferredVoice": {
+          "type": "string",
+          "description": "The user's preferred voice for text-to-speech narration (e.g., 'standard-male', 'hindi-female')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user preferences were created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user preferences were last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "defaultExplanationLanguage",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Document": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Document",
+      "type": "object",
+      "description": "Represents a government form uploaded by a user. Stores metadata about the file, its storage location, and AI processing status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Document entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Document)"
+        },
+        "originalFileName": {
+          "type": "string",
+          "description": "The original name of the file as uploaded by the user."
+        },
+        "storagePath": {
+          "type": "string",
+          "description": "The URI or path to the stored document file in cloud storage (e.g., Firebase Storage).",
+          "format": "uri"
+        },
+        "fileType": {
+          "type": "string",
+          "description": "The MIME type or file extension of the uploaded document (e.g., 'application/pdf', 'image/jpeg')."
+        },
+        "uploadDate": {
+          "type": "string",
+          "description": "Timestamp indicating when the document was uploaded.",
+          "format": "date-time"
+        },
+        "processingStatus": {
+          "type": "string",
+          "description": "The current status of the document's AI processing (e.g., 'uploaded', 'processing', 'completed', 'failed')."
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time this document was accessed or viewed by the user, used for 'recent uploads'.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the document record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the document record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "originalFileName",
+        "storagePath",
+        "fileType",
+        "uploadDate",
+        "processingStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Explanation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Explanation",
+      "type": "object",
+      "description": "Contains an AI-generated, simplified explanation of a document's content in a specific language, along with extracted key information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Explanation entity."
+        },
+        "documentId": {
+          "type": "string",
+          "description": "Reference to Document. (Relationship: Document 1:N Explanation)"
+        },
+        "language": {
+          "type": "string",
+          "description": "The ISO 639-1 code or similar identifier for the language of this explanation (e.g., 'en', 'hi', 'bn')."
+        },
+        "explanationText": {
+          "type": "string",
+          "description": "The AI-generated, simplified explanation of the document's content."
+        },
+        "keyInformation": {
+          "type": "array",
+          "description": "An array of extracted key data points or insights from the document, represented as strings (e.g., 'Tax Year: 2023', 'Form Type: ITR-1').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "originalTextSegments": {
+          "type": "array",
+          "description": "An array of original complex text segments from the document that were analyzed and explained.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "generatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this explanation was generated by the AI.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the explanation record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the explanation record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "documentId",
+        "language",
+        "explanationText",
+        "generatedAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores primary user profile information. The document ID ({userId}) corresponds to the authenticated user's ID (request.auth.uid). This collection adheres to the DBAC principle by defining user existence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching request.auth.uid."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/userPreferences/{userPreferenceId}",
+        "definition": {
+          "entityName": "UserPreference",
+          "schema": {
+            "$ref": "#/backend/entities/UserPreference"
+          },
+          "description": "Stores individual user preferences. This data is private to the user. The `userId` in the path ensures direct user ownership, simplifying security rules. The `userPreferenceId` should reflect the 1:1 nature (e.g., 'default') or the entity's ID field.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching request.auth.uid."
+            },
+            {
+              "name": "userPreferenceId",
+              "description": "The unique identifier for the user's preference document (e.g., 'default')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/documents/{documentId}",
+        "definition": {
+          "entityName": "Document",
+          "schema": {
+            "$ref": "#/backend/entities/Document"
+          },
+          "description": "Stores metadata for documents uploaded by a specific user. This collection is private to the user. The `userId` in the path ensures direct user ownership and simplifies security rules, while the `userId` field within each document provides authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching request.auth.uid."
+            },
+            {
+              "name": "documentId",
+              "description": "The unique identifier for the uploaded document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/documents/{documentId}/explanations/{explanationId}",
+        "definition": {
+          "entityName": "Explanation",
+          "schema": {
+            "$ref": "#/backend/entities/Explanation"
+          },
+          "description": "Stores AI-generated explanations for a specific document, belonging to a specific user. This subcollection is private. It includes denormalized `userId` (from the parent user) and `documentId` (from the parent document) within each explanation document for authorization independence, eliminating `get()` calls in security rules. The `userId` in the path segment directly ties the explanation to its owner.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching request.auth.uid."
+            },
+            {
+              "name": "documentId",
+              "description": "The unique identifier for the parent document."
+            },
+            {
+              "name": "explanationId",
+              "description": "The unique identifier for the generated explanation."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for Sahaj AI prioritizes secure, scalable, and debuggable access control by strictly adhering to the core design principles and strategy mandates. The structure is built around a hierarchical, user-centric model where all user-specific data is nested under a top-level `/users/{userId}` collection.\n\n**Authorization Independence:** This is achieved primarily through structural segregation and strategic denormalization. Each document in a subcollection (e.g., `userPreferences`, `documents`, `explanations`) will explicitly contain the `userId` in its document data, matching the `userId` wildcard in its path. For example, `Explanation` documents, which are nested two levels deep (`/users/{userId}/documents/{documentId}/explanations/{explanationId}`), will include a `userId` field to directly link them to their owner. This eliminates the need for `get()` operations in security rules to check parent document ownership, thereby supporting atomic operations and significantly simplifying rule logic and debugging. Any create, read, update, or delete operation on these documents can verify ownership solely by comparing `request.auth.uid` with the `userId` in the document and the `userId` in the path, ensuring no hierarchical dependencies.\n\n**Support for QAPs (Queryable Authorization Patterns):** The hierarchical path-based ownership model (`/users/{userId}/...`) intrinsically supports QAPs. Since all data belonging to a specific user is located under their unique `userId` path segment, security rules can easily enforce that `request.auth.uid == userId` for all read/write operations. This allows for efficient `list` operations (queries) because Firestore can use the path segment `userId` as a natural filter, ensuring that a user can only query their own data. For instance, querying `/users/myUserId/documents` will only return documents belonging to `myUserId`, without requiring additional filtering in the rules or client-side.\n\n**Conflict Resolution (JWT & request.auth.uid):** The design strictly adheres to the prompt's mandate that 'Authorization relies solely on `request.auth.uid`'. While the user's instruction to 'dont use firebase auth, use jwt and local storage' is noted, a robust Firestore security model *requires* `request.auth.uid` to be populated for user-specific authorization. Therefore, this data structure design assumes that a backend service will validate the JWT from local storage, and then mint and provide a custom Firebase Auth token to the client. The client would then use this custom token to sign in to Firebase, thereby populating `request.auth.uid` with the validated user's ID for use in security rules. Without this mechanism, fine-grained, user-specific security rules as mandated by the prompt would be impossible in Firestore.\n\n**Structural Segregation & Access Modeling:**\n*   **Private Data:** All user-specific data (`UserPreference`, `Document`, `Explanation`) is private and is structured under `/users/{userId}`, leveraging path-based ownership for strong security.\n*   **User 1:1 Entity:** `UserPreference` is a 1:1 relationship with `User`, placed under `/users/{userId}/userPreferences/{userPreferenceId}`.\n*   **User 1:N Entity:** `Document` entities are owned by `User`s, hence `/users/{userId}/documents/{documentId}`.\n*   **Nested 1:N Entity:** `Explanation` entities are owned by `Document`s (and thus by `User`s), leading to `/users/{userId}/documents/{documentId}/explanations/{explanationId}`. This deep nesting continues the pattern of path-based ownership, with `userId` denormalized into `Explanation` documents for Authorization Independence."
+  }
+}

@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * SAHAJ AI SECURITY RULES - PROTOTYPING MODE
+     *
+     * CORE PHILOSOPHY:
+     * This ruleset enforces a strict user-ownership model where all data is private by default. 
+     * Access is restricted to the authenticated user whose ID matches the path segment.
+     *
+     * DATA STRUCTURE:
+     * The database follows a hierarchical, user-centric structure:
+     * - /users/{userId} : Root user profile.
+     * - /users/{userId}/userPreferences/{id} : Private settings.
+     * - /users/{userId}/documents/{id} : User-uploaded government forms.
+     * - /users/{userId}/documents/{id}/explanations/{id} : AI-generated insights.
+     *
+     * KEY SECURITY DECISIONS:
+     * 1. Authorization Independence: Every subcollection document denormalizes the `userId` or parent `documentId`. 
+     *    This allows rules to verify ownership without performing expensive `get()` calls to parent documents.
+     * 2. Identity Source: While the application may use external JWTs, these rules rely on those tokens being 
+     *    exchanged for Firebase Custom Tokens, populating `request.auth.uid` for secure, server-side validation.
+     * 3. Structural Segregation: No data is shared between users. Path-based security ensures users can only 
+     *    query (list) and read (get) their own documents.
+     * 4. Prototyping Flexibility: This ruleset enforces ownership and relational integrity (IDs matching paths) 
+     *    but does not restrict data schemas (types/fields) to allow for rapid iteration on AI outputs.
+     */
+
+    // --- HELPER FUNCTIONS ---
+
+    /**
+     * @description Checks if the request is from an authenticated user.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Validates that the authenticated user matches the provided ID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Combines ownership check with a check that the resource exists (for update/delete).
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /**
+     * @description Ensures critical relational fields are not changed during an update.
+     */
+    function isUnchanged(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the User root document. Provides the anchor for all subcollections.
+     * @path /users/{userId}
+     * @allow (get) If the user is the owner.
+     * @deny (create) If the userId in the path does not match the auth UID.
+     * @principle Ownership and Self-Creation (P3.1, P3.4).
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('id');
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for User Preferences. 1:1 relationship with the user.
+       * @path /users/{userId}/userPreferences/{userPreferenceId}
+       * @allow (create) If userId in data matches the owner in the path.
+       * @deny (list) If a user tries to list preferences of another userId path.
+       * @principle Ownership (P3.1) and Relational Integrity (P5).
+       */
+      match /userPreferences/{userPreferenceId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Rules for User Documents (uploaded forms).
+       * @path /users/{userId}/documents/{documentId}
+       * @allow (update) If the owner modifies their own document metadata.
+       * @deny (delete) If the resource does not exist or the user is not the owner.
+       * @principle Ownership (P3.1) and Robustness (P7).
+       */
+      match /documents/{documentId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Rules for AI Explanations belonging to a document.
+         * @path /users/{userId}/documents/{documentId}/explanations/{explanationId}
+         * @allow (list) Owner can list all explanations for their specific document.
+         * @deny (create) If the documentId in data does not match the path parameter.
+         * @principle Ownership (P3.1) and Path-Document Consistency (P5).
+         */
+        match /explanations/{explanationId} {
+          allow get: if isOwner(userId);
+          allow list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.documentId == documentId;
+          allow update: if isExistingOwner(userId) && isUnchanged('documentId');
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+  }
+}
