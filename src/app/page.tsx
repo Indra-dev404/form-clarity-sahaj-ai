@@ -1,7 +1,32 @@
+'use client';
+
 import { AppHeader } from "@/components/app/header";
 import { SahajApp } from "@/components/app/sahaj-app";
+import { useAuth } from "@/components/app/auth-context";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 export default function HomePage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
+
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
