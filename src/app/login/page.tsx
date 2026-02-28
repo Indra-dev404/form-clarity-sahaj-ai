@@ -1,5 +1,6 @@
 'use client';
-
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from 'react';
 import { useAuth } from '@/components/app/auth-context';
 import { loginAction } from '@/app/actions';
@@ -44,7 +45,13 @@ export default function LoginPage() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="p-3 bg-primary/10 rounded-full">
-              <Bot className="h-10 w-10 text-primary" />
+              <Image
+                          src="/logof.png"
+                          alt="Sahaj AI Logo"
+                          width={40}
+                          height={40}
+                          priority
+              />
             </div>
           </div>
           <div className="space-y-1">

@@ -14,7 +14,13 @@ export function AppHeader() {
       <div className="container mx-auto flex items-center justify-between">
         
         <Link href="/" className="flex items-center gap-3">
-          <Bot className="h-8 w-8 text-primary" />
+        <Image
+            src="/logof.png"
+            alt="Sahaj AI Logo"
+            width={40}
+            height={40}
+            priority
+        />
           <h1 className="text-2xl font-headline font-bold text-foreground">
             Sahaj AI
           </h1>
